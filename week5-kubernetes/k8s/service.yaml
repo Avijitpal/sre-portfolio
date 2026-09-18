@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sre-service
+  labels:
+    app: sre-service
+spec:
+  type: ClusterIP
+  selector:
+    app: sre-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
