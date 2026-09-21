@@ -62,7 +62,8 @@ jobs:
 
       - name: Download and Run Kubeconform
         run: |
-          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar -xz kubeconform
+          wget -q https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform-linux-amd64.tar.gz
           chmod +x kubeconform
           sudo mv kubeconform /usr/local/bin/
-          kubeconform -summary -strict week5-kubernetes/k8s/*.yaml
+          kubeconform -summary -strict week5-kubernetes/k8s/
