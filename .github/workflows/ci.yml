@@ -1,0 +1,67 @@
+name: SRE Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  app-test:
+    name: Node.js Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Test Suite
+        working-directory: ./week4-docker-containers/app
+        run: npm test
+
+  docker-security-scan:
+    name: Docker Build & Trivy Scan
+    needs: app-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: actions/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t sre-service:${{ github.sha }} \
+            -f week4-docker-containers/Dockerfile \
+            week4-docker-containers
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: sre-service:${{ github.sha }}
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+  k8s-manifest-validation:
+    name: Kubeconform Manifest Validation
+    needs: app-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download and Run Kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar -xz kubeconform
+          chmod +x kubeconform
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -summary -strict week5-kubernetes/k8s/*.yaml
