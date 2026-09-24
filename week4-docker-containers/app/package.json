@@ -1,13 +1,6 @@
 {
-  "name": "sre-container-service",
-  "version": "1.0.0",
-  "description": "Production SRE microservice demonstrating graceful shutdown and health checks",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "test": "node -e \"console.log('Smoke tests passed successfully'); process.exit(0);\""
-  },
   "dependencies": {
+    "express": "^5.2.1",
     "prom-client": "^15.1.3"
   }
 }
